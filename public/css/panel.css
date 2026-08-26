@@ -1,0 +1,153 @@
+/* Extensión ligera de app_2.css: define botones/cards/tablas genéricos que
+   las vistas nuevas (panel, notas, mesas-inscriptos) necesitan y que
+   app_2.css no trae, usando la misma paleta (#700101 / #f5f5f4 / bordes
+   #eaeae9, radios de 12-15px, fuente Overpass). No modifica app_2.css. */
+
+.pf-page {
+    padding-top: 105px;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding-left: 16px;
+    padding-right: 16px;
+    padding-bottom: 60px;
+}
+
+.pf-page h1 {
+    font-size: 1.6rem;
+    margin-bottom: 20px;
+    color: #212121;
+}
+
+.pf-page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.pf-card {
+    background: #fff;
+    border: 1px solid #eaeae9;
+    border-radius: 15px;
+    padding: 22px;
+    margin-bottom: 20px;
+    box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.06);
+}
+
+.pf-card h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 1.15rem;
+    color: #212121;
+}
+
+.pf-muted {
+    color: #8a8a88;
+}
+
+/* ---- Botones ---- */
+.btn {
+    display: inline-block;
+    padding: 8px 18px;
+    border-radius: 25px;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+    border: 2px solid transparent;
+    cursor: pointer;
+    text-decoration: none;
+    transition: opacity 0.2s ease, transform 0.15s ease;
+}
+
+.btn:hover {
+    opacity: 0.9;
+}
+
+.btn-primary {
+    background-color: #700101;
+    color: #fff;
+}
+
+.btn-secondary {
+    background-color: #fff;
+    color: #700101;
+    border-color: #700101;
+}
+
+.btn-danger {
+    background-color: #fff;
+    color: #c0392b;
+    border-color: #c0392b;
+}
+
+.btn-sm {
+    padding: 5px 12px;
+    font-size: 12.5px;
+}
+
+/* ---- Tablas ---- */
+.pf-table-wrap {
+    overflow-x: auto;
+}
+
+table.pf-table,
+.table-responsive table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+table.pf-table th,
+table.pf-table td,
+.table-responsive table th,
+.table-responsive table td {
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 1px solid #eaeae9;
+    font-size: 14px;
+}
+
+table.pf-table thead th,
+.table-responsive table thead th {
+    color: #700101;
+    font-weight: 700;
+    background-color: #f9f7f6;
+}
+
+/* ---- Badges (usados para libre/regular) ---- */
+.pf-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #fff;
+    display: inline-block;
+}
+
+.pf-badge-regular,
+.bg-success {
+    background-color: #2e7d32 !important;
+}
+
+.pf-badge-libre,
+.bg-secondary {
+    background-color: #8a8a88 !important;
+}
+
+/* ---- Formularios simples ---- */
+.pf-form-inline {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.pf-form-inline select,
+.pf-form-inline input[type="number"],
+.pf-form-inline input[type="text"] {
+    padding: 7px 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-family: "Overpass", sans-serif;
+}

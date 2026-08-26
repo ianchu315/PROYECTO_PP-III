@@ -1,0 +1,139 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Foundation\Auth\User as Authenticatable; 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Contracts\Auth\CanResetPassword; // <- agregar
+use Illuminate\Auth\Passwords\CanResetPassword as CanResetPasswordTrait; // <- agregar
+use App\Models\Calificacion;
+
+class Usuario extends Authenticatable implements CanResetPassword
+{
+    use Notifiable, HasFactory, CanResetPasswordTrait; // <- agregar CanResetPasswordTrait
+
+    protected $table = 'usuarios';
+
+    protected $fillable = [
+        'nombre',
+        'apellido',
+        'email',
+        'fecha_nacimiento',
+        'dni',
+        'genero',
+        'nacionalidad',
+        'ciudad_residencia',
+        'pais_residencia',
+        'foto_perfil',
+        'descripcion',
+        'sitio_web',
+        'carrera_id',
+        'anio_id',
+        'aprobado',
+        'estado',
+        'rol',
+        'password',
+        'telefono'
+    ];
+
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
+    public function carrera()
+    {
+        return $this->belongsTo(Carrera::class);
+    }
+
+    public function anio()
+    {
+        return $this->belongsTo(Anio::class, 'anio_id');
+    }
+
+    public function experienciasLaborales()
+    {
+        return $this->hasMany(ExperienciaLaboral::class, 'usuario_id');
+    }
+
+    public function aptitudes()
+    {
+        return $this->hasMany(Aptitud::class);
+    }
+
+    public function estudios()
+    {
+        return $this->hasMany(Estudio::class);
+    }
+
+    public function cursos()
+    {
+        return $this->hasMany(Curso::class);
+    }
+
+    public function postulaciones()
+    {
+        return $this->hasMany(Postulacion::class);
+    }
+
+    public function calificaciones()
+    {
+        return $this->hasMany(Calificacion::class, 'usuario_id');
+    }
+
+    public function getPromedioNotasAttribute()
+    {
+        $promedio = $this->calificaciones()
+            ->whereNotNull('nota')
+            ->avg('nota');
+
+        return $promedio !== null ? round($promedio, 2) : 0.0;
+    }
+
+    public function getRegularidadAttribute()
+    {
+        return $this->promedio_notas >= 4 ? 'REGULAR' : 'NO REGULAR';
+    }
+
+    public function condicionEnMateria($materiaId): string
+    {
+    $promedio = $this->calificaciones()
+        ->where('materia_id', $materiaId)
+        ->where('tipo', 'cuatrimestre')
+        ->whereNotNull('nota')
+        ->avg('nota');
+
+    // >= 4 en el promedio de los cuatrimestres => regular directo
+    if ($promedio !== null && $promedio >= 4) {
+        return 'regular';
+    }
+
+    // Si no llegó a 4, la nota extra funciona como recuperatorio:
+    // si esa nota extra es >= 4, igual queda regular.
+    $notaExtra = $this->calificaciones()
+        ->where('materia_id', $materiaId)
+        ->where('tipo', 'extra')
+        ->whereNotNull('nota')
+        ->value('nota');
+
+    if ($notaExtra !== null && $notaExtra >= 4) {
+        return 'regular';
+    }
+
+    return 'libre';
+    }
+
+    public function materiasInscripto()
+    {
+        return $this->belongsToMany(Materia::class, 'inscripcion_materia', 'usuario_id', 'materia_id')
+            ->withPivot('fecha_inscripcion')
+            ->withTimestamps();
+    }
+
+
+    public function usuariosQueGuardaron()
+    {
+        return $this->belongsToMany(Usuario::class, 'ofertas_guardadas', 'oferta_id', 'usuario_id');
+    }
+}
