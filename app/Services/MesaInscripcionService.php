@@ -2,8 +2,6 @@
 
 namespace App\Services;
 
-use App\Services\RegularidadService;
-
 class MesaInscripcionService
 {
     public function canRegister($usuario, $mesa, $inscripciones): bool
@@ -17,8 +15,17 @@ class MesaInscripcionService
             return false;
         }
 
-        // Debe pertenecer a la misma carrera
-        if ((int) ($usuario->carrera_id ?? 0) !== (int) ($mesa->carrera_id ?? 0)) {
+        // Debe pertenecer a la carrera de la mesa, como principal o adicional.
+        $carreraMesaId = (int) ($mesa->carrera_id ?? 0);
+        $perteneceACarrera = (int) ($usuario->carrera_id ?? 0) === $carreraMesaId;
+
+        if (!$perteneceACarrera && method_exists($usuario, 'carrerasHabilitadas')) {
+            $perteneceACarrera = $usuario->carrerasHabilitadas()
+                ->where('carreras.id', $carreraMesaId)
+                ->exists();
+        }
+
+        if (!$perteneceACarrera) {
             return false;
         }
 

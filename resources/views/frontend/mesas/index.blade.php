@@ -3,16 +3,6 @@
 @section('title', 'Mesas disponibles')
 
 @section('content')
-    @if(Auth::guard('usuarios')->check())
-        <div class="container pt-3 d-flex justify-content-end align-items-center gap-2">
-            <span>Hola, {{ Auth::guard('usuarios')->user()->nombre }}</span>
-            <form method="POST" action="{{ route('bolsadetrabajo.logout') }}" class="m-0">
-             @csrf
-            <button type="submit" class="btn btn-outline-danger btn-sm">Cerrar sesión</button>
-            </form>
-        </div>
-    @endif
-    
     <style>
         body {
             background-color: #1e1e1e;
@@ -302,12 +292,6 @@
 
         </div>
 
-        @guest('usuarios')
-            <div class="text-center mb-4">
-                <a href="{{ route('bolsadetrabajo.iniciar-sesion', ['redirect' => request()->fullUrl()]) }}" class="btn btn-outline-success">Iniciar sesión para inscribirte</a>
-            </div>
-        @endguest
-
         {{-- Si está deshabilitado en la config --}}
         @if(!$mostrar)
             <div class="text-center mt-4">
@@ -384,16 +368,6 @@
                                                         <td class="text-success">{{ $mesa->vocal->apellido ?? '-' }}, {{ $mesa->vocal->nombre ?? '-' }}</td>
                                                         <td>
                                                             {{ $mesa->Salon->numero_salon ?? '-' }}
-                                                            @if(isset($usuario) && ($canRegisterMap[$mesa->id] ?? false))
-                                                                <br>
-                                                                <a href="{{ route('frontend.mesas.inscribir.confirmar', $mesa) }}" class="btn btn-sm btn-success mt-2">Inscribirme</a>
-                                                            @elseif(!isset($usuario))
-                                                                <br>
-                                                                <a href="{{ route('bolsadetrabajo.iniciar-sesion', ['redirect' => request()->fullUrl()]) }}" class="btn btn-sm btn-outline-success mt-2">Iniciar sesión para inscribirte</a>
-                                                            @else
-                                                                <br>
-                                                                <button class="btn btn-sm btn-secondary mt-2" disabled>No disponible</button>
-                                                            @endif
                                                         </td>
                                                     </tr>
                                                 @endforeach
@@ -476,16 +450,6 @@
                                                             <td>{{ $mesa->vocal->apellido ?? '-' }}, {{ $mesa->vocal->nombre ?? '-' }}</td>
                                                             <td>
                                                                 {{ $mesa->Salon->numero_salon ?? 'Sin salón' }}
-                                                                @if(isset($usuario) && ($canRegisterMap[$mesa->id] ?? false))
-                                                                    <br>
-                                                                    <a href="{{ route('frontend.mesas.inscribir.confirmar', $mesa) }}" class="btn btn-sm btn-success mt-2">Inscribirme</a>
-                                                                @elseif(!isset($usuario))
-                                                                    <br>
-                                                                    <a href="{{ route('bolsadetrabajo.iniciar-sesion', ['redirect' => request()->fullUrl()]) }}" class="btn btn-sm btn-outline-success mt-2">Iniciar sesión para inscribirte</a>
-                                                                @else
-                                                                    <br>
-                                                                    <button class="btn btn-sm btn-secondary mt-2" disabled>No disponible</button>
-                                                                @endif
                                                             </td>
                                                         </tr>
                                                     @endforeach
@@ -609,6 +573,5 @@
     </script>
 
 
-@include('partials.popup_lista_espera')
 
 @endsection

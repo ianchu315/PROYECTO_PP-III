@@ -58,7 +58,8 @@ body {
     justify-content: center;
     width: 70px;
     height: 30px;
-    overflow: hidden;
+    overflow: visible;
+    z-index: 1;
 }
 
 #navbar nav a i,
@@ -79,19 +80,36 @@ body {
 
 #navbar nav a span {
     opacity: 0;
-    transform: translate(-50%, -20%) scale(0.95);
-    color: #700101;
+    top: calc(100% + 12px);
+    transform: translate(-50%, 0) scale(0.95);
+    width: max-content;
+    max-width: 220px;
+    padding: 7px 10px;
+    border-radius: 6px;
+    background: #700101;
+    color: #fff;
     font-size: 14px;
+    line-height: 1.2;
+    text-align: center;
+    white-space: normal;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.18);
+    z-index: 20;
 }
 
-#navbar nav a:hover i {
-    opacity: 0;
-    transform: translate(-50%, -80%) scale(0.9);
+#navbar nav a span::before {
+    content: "";
+    position: absolute;
+    top: -5px;
+    left: 50%;
+    width: 10px;
+    height: 10px;
+    background: #700101;
+    transform: translateX(-50%) rotate(45deg);
 }
 
 #navbar nav a:hover span {
     opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
+    transform: translate(-50%, 0) scale(1);
 }
 
 #navbar nav a i.selected {

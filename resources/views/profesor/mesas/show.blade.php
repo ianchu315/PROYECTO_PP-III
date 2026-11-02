@@ -1,4 +1,6 @@
-@extends('layouts.app2')
+@extends(in_array(Auth::guard('usuarios')->user()->rol, ['administrador', 'superadministrador']) ? 'layouts.panel' : 'layouts.app2')
+
+@section('titulo', 'Alumnos inscriptos a mesa')
 
 @section('content')
 <div class="pf-page">
@@ -19,8 +21,10 @@
         @if($inscriptos->isEmpty())
             <p class="pf-muted mb-0">Todavía no hay alumnos inscriptos en esta mesa.</p>
         @else
+            @include('partials.filtro_rapido', ['target' => '#tabla-inscriptos', 'placeholder' => 'Buscar por nombre, email o DNI...'])
+
             <div class="pf-table-wrap">
-                <table class="pf-table">
+                <table class="pf-table" id="tabla-inscriptos">
                     <thead>
                         <tr>
                             <th>Alumno</th>

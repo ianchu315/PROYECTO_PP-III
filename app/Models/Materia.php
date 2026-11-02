@@ -20,6 +20,7 @@ class Materia extends Model
     protected $fillable = [
         'materia',
         'profesor_usuario_id',
+        'vocal_usuario_id',
     ];
 
 
@@ -50,6 +51,13 @@ class Materia extends Model
         return $this->belongsTo(Usuario::class, 'profesor_usuario_id');
     }
 
+    // Cuenta de profesor que oficia de vocal de mesa para esta materia
+    // (independiente de quién sea el titular/profesorUsuario).
+    public function vocalUsuario()
+    {
+        return $this->belongsTo(Usuario::class, 'vocal_usuario_id');
+    }
+
     public function alumnosInscriptos()
     {
         return $this->belongsToMany(Usuario::class, 'inscripcion_materia', 'materia_id', 'usuario_id')
@@ -60,6 +68,16 @@ class Materia extends Model
     public function calificaciones()
     {
         return $this->hasMany(Calificacion::class, 'materia_id');
+    }
+
+    public function unidades()
+    {
+        return $this->hasMany(MateriaUnidad::class, 'materia_id')->orderBy('orden');
+    }
+
+    public function asistencias()
+    {
+        return $this->hasMany(Asistencia::class, 'materia_id');
     }
 
     public function presidentes(){

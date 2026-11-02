@@ -4,7 +4,9 @@
 <div class="container">
     <h2>Usuarios pendientes de aprobación</h2>
 
-    <table class="table table-striped">
+    @include('partials.filtro_rapido', ['target' => '#tabla-pendientes', 'placeholder' => 'Buscar por nombre o email...'])
+
+    <table class="table table-striped" id="tabla-pendientes">
         <thead>
             <tr>
                 <th>Nombre</th>

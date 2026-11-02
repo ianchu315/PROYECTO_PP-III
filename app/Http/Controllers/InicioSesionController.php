@@ -56,6 +56,12 @@ class InicioSesionController extends Controller
                 return back()->withInput();
             }
 
+            if ($estado === 'inactivo') {
+                Auth::guard('usuarios')->logout();
+                Flasher::addError('Tu cuenta fue dada de baja. Contactate con el administrador si creés que es un error.');
+                return back()->withInput();
+            }
+
             if (!$usuario->perfil_completado) {
                 Flasher::addSuccess('Completa tu perfil');
             //    return redirect()->route('bolsadetrabajo.perfil.editar');

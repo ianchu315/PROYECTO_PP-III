@@ -152,6 +152,8 @@
                 <label for="rol">Rol</label>
                 <select id="rol" name="rol" class="@error('rol') input-error @enderror">
                     <option value="usuario" {{ $usuario->rol === 'usuario' ? 'selected' : '' }}>Usuario</option>
+                    <option value="profesor" {{ $usuario->rol === 'profesor' ? 'selected' : '' }}>Profesor</option>
+                    <option value="preceptor" {{ $usuario->rol === 'preceptor' ? 'selected' : '' }}>Preceptor</option>
                     <option value="administrador" {{ $usuario->rol === 'administrador' ? 'selected' : '' }}>Administrador</option>
                 </select>
                 @error('rol')

@@ -5,32 +5,15 @@ namespace App\Http\Controllers\Frontend;
 use App\Http\Controllers\Controller;
 use App\Models\Mesa;
 use App\Models\Configuracion;
-use Illuminate\Support\Facades\Auth;
-use App\Services\MesaInscripcionService;
 use Illuminate\Http\Request;
 
+// Mesasfront es puramente informativa: muestra fecha, materia, presidente,
+// vocal y salón de cada mesa. No filtra por usuario ni ofrece inscripción
+// (eso ahora vive en el panel del alumno, ver AlumnoMesasController).
 class MesaPublicaController extends Controller
 {
     public function index(Request $request)
     {
-        $usuario = Auth::guard('usuarios')->user();
-
-        // Datos del panel del superadmin (dos listas: pendientes y activos).
-        // Se calculan una sola vez y sirven para los dos returns.
-        $mostrarPopupSuperUsuario = false;
-        $usuariosPendientes = collect();
-        $usuariosActivos = collect();
-        if ($usuario && $usuario->rol === 'superadministrador') {
-            $mostrarPopupSuperUsuario = true;
-            $usuariosPendientes = \App\Models\Usuario::where('estado', 'pendiente')
-                ->orderBy('created_at', 'desc')
-                ->get();
-            $usuariosActivos = \App\Models\Usuario::where('estado', 'aprobado')
-                ->whereIn('rol', ['usuario', 'profesor'])
-                ->orderBy('apellido')
-                ->get();
-        }
-
         $config = Configuracion::where('clave', 'mostrar_mesas')->first();
 
         if (!$config || !$config->valor) {
@@ -38,34 +21,14 @@ class MesaPublicaController extends Controller
                 'mesas' => collect(),
                 'mostrar' => false,
                 'modo' => 'fecha',
-                'mostrarPopupSuperUsuario' => $mostrarPopupSuperUsuario,
-                'usuariosPendientes' => $usuariosPendientes,
-                'usuariosActivos' => $usuariosActivos,
             ]);
         }
 
         $modo = $request->get('orden', 'fecha'); // por defecto se ordena por fecha
 
-        $mesasQuery = Mesa::with(['materia', 'profesor', 'carrera', 'vocal', 'resolucion'])
-            ->orderBy('fecha');
-
-        // Si hay un usuario logueado con carrera asignada (alumno), mostramos
-        // SOLO las mesas de su carrera.
-        if ($usuario && !empty($usuario->carrera_id)) {
-            $mesasQuery->where('carrera_id', $usuario->carrera_id);
-        }
-
-        $mesas = $mesasQuery->get();
-
-        // Si hay usuario autenticado, calcular para cada mesa si puede inscribirse
-        $canRegisterMap = [];
-        if ($usuario) {
-            $service = new MesaInscripcionService();
-            $inscripciones = \App\Models\MesaInscripcion::where('usuario_id', $usuario->id)->get();
-            foreach ($mesas as $mesa) {
-                $canRegisterMap[$mesa->id] = $service->canRegister($usuario, $mesa, $inscripciones);
-            }
-        }
+        $mesas = Mesa::with(['materia', 'profesor', 'carrera', 'vocal', 'resolucion'])
+            ->orderBy('fecha')
+            ->get();
 
         // inicializo la variable que la vista espera
         $mesasOrdenadas = collect();
@@ -105,11 +68,6 @@ class MesaPublicaController extends Controller
             'mesas' => $mesasOrdenadas,
             'mostrar' => true,
             'modo' => $modo,
-            'canRegisterMap' => $canRegisterMap,
-            'usuario' => $usuario,
-            'mostrarPopupSuperUsuario' => $mostrarPopupSuperUsuario,
-            'usuariosPendientes' => $usuariosPendientes,
-            'usuariosActivos' => $usuariosActivos,
         ]);
     }
 

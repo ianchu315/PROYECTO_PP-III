@@ -16,6 +16,8 @@
             @if(!isset($usuariosPendientes) || $usuariosPendientes->isEmpty())
                 <p class="panel-super-vacio">No hay usuarios pendientes.</p>
             @else
+                @include('partials.filtro_rapido', ['target' => '#lista-espera-items', 'placeholder' => 'Buscar en la lista de espera...'])
+                <div id="lista-espera-items">
                 @foreach($usuariosPendientes as $usuarioPendiente)
                     <div class="panel-super-item">
                         <div class="panel-super-datos">
@@ -34,8 +36,6 @@
                                     Aprobar como Profesor
                                 </button>
                             </form>
-                                <button class="btn btn-sm btn-success" type="submit">Aprobar</button>
-                            </form>
                             <form action="{{ route('admin.aprobacion.reject', $usuarioPendiente->id) }}" method="POST">
                                 @csrf
                                 <input type="hidden" name="volver" value="{{ url()->current() }}">
@@ -44,6 +44,7 @@
                         </div>
                     </div>
                 @endforeach
+                </div>
             @endif
         </div>
 
@@ -54,6 +55,8 @@
             @if(!isset($usuariosActivos) || $usuariosActivos->isEmpty())
                 <p class="panel-super-vacio">No hay usuarios activos.</p>
             @else
+                @include('partials.filtro_rapido', ['target' => '#usuarios-activos-items', 'placeholder' => 'Buscar usuario activo...'])
+                <div id="usuarios-activos-items">
                 @foreach($usuariosActivos as $usuarioActivo)
                     <div class="panel-super-item">
                         <div class="panel-super-datos">
@@ -71,6 +74,7 @@
                         </div>
                     </div>
                 @endforeach
+                </div>
             @endif
         </div>
 

@@ -1,6 +1,6 @@
-@extends('frontend.layout.main')
+@extends('layouts.panel')
 
-@section('title', 'Confirmar inscripción')
+@section('titulo', 'Confirmar inscripción')
 
 @section('content')
 <div class="mesa-confirmar-wrap">
@@ -51,7 +51,7 @@
 
             <div class="mesa-confirmar-acciones">
                 <button type="submit" class="mesa-confirmar-btn mesa-confirmar-btn--confirmar">Confirmar inscripción</button>
-                <a href="{{ route('frontend.mesas.index') }}" class="mesa-confirmar-btn mesa-confirmar-btn--volver">Volver</a>
+                <a href="{{ route('bolsadetrabajo.alumno.mesas.index') }}" class="mesa-confirmar-btn mesa-confirmar-btn--volver">Volver</a>
             </div>
         </form>
     </div>

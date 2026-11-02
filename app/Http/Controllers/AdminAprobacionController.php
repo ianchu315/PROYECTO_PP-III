@@ -22,9 +22,9 @@ class AdminAprobacionController extends Controller
         $usuario->estado = 'aprobado';
         $usuario->aprobado = true;
 
-    // Rol asignado por el superadmin al aprobar: usuario (alumno) o profesor
+    // Rol asignado por el superadmin al aprobar: usuario (alumno), profesor o preceptor
         $rol = $request->input('rol');
-        if (in_array($rol, ['usuario', 'profesor'], true)) {
+        if (in_array($rol, ['usuario', 'profesor', 'preceptor'], true)) {
         $usuario->rol = $rol;
         }
 

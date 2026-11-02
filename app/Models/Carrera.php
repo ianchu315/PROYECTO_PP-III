@@ -40,6 +40,18 @@ class Carrera extends Model
         return $this->hasMany(Usuario::class);
     }
 
+    public function preceptores()
+    {
+        return $this->belongsToMany(Usuario::class, 'preceptor_carrera', 'carrera_id', 'usuario_id')
+            ->withTimestamps();
+    }
+
+    public function usuariosHabilitados()
+    {
+        return $this->belongsToMany(Usuario::class, 'usuario_carrera', 'carrera_id', 'usuario_id')
+            ->withTimestamps();
+    }
+
     public function ofertas()
     {
         return $this->hasMany(Oferta::class);

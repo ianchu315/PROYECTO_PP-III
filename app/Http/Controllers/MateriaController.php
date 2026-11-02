@@ -47,7 +47,7 @@ class materiaController extends Controller
         $carreras = Carrera::pluck('descripcion', 'id');
         $profesores = Profesor::pluck('nombre', 'id');
         $categoria = Categoria::pluck('categoria', 'id');
-        $profesoresUsuarios = Usuario::where('rol', 'profesor')
+        $profesoresUsuarios = Usuario::whereIn('rol', ['profesor', 'administrador', 'superadministrador'])
             ->orderBy('apellido')->orderBy('nombre')
             ->get()
             ->mapWithKeys(fn($u) => [$u->id => $u->apellido . ', ' . $u->nombre . ' (' . $u->email . ')']);
@@ -130,7 +130,7 @@ class materiaController extends Controller
         $anios = Anio::pluck('anio', 'id');
         $carreras = Carrera::pluck('descripcion', 'id');
         $programas = Programa::pluck('ruta', 'id');
-        $profesoresUsuarios = Usuario::where('rol', 'profesor')
+        $profesoresUsuarios = Usuario::whereIn('rol', ['profesor', 'administrador', 'superadministrador'])
             ->orderBy('apellido')->orderBy('nombre')
             ->get()
             ->mapWithKeys(fn($u) => [$u->id => $u->apellido . ', ' . $u->nombre . ' (' . $u->email . ')']);

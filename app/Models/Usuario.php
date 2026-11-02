@@ -47,6 +47,26 @@ class Usuario extends Authenticatable implements CanResetPassword
         return $this->belongsTo(Carrera::class);
     }
 
+    public function carrerasAsignadas()
+    {
+        return $this->belongsToMany(Carrera::class, 'preceptor_carrera', 'usuario_id', 'carrera_id')
+            ->withTimestamps();
+    }
+
+    public function carrerasHabilitadas()
+    {
+        return $this->belongsToMany(Carrera::class, 'usuario_carrera', 'usuario_id', 'carrera_id')
+            ->withTimestamps();
+    }
+
+    // Registro de "profesor" en el módulo de mesas (presidente/vocal),
+    // vinculado desde el panel de asignaciones para no cargar los datos
+    // dos veces.
+    public function profesorMesas()
+    {
+        return $this->hasOne(Profesor::class, 'usuario_id');
+    }
+
     public function anio()
     {
         return $this->belongsTo(Anio::class, 'anio_id');
@@ -129,6 +149,37 @@ class Usuario extends Authenticatable implements CanResetPassword
         return $this->belongsToMany(Materia::class, 'inscripcion_materia', 'usuario_id', 'materia_id')
             ->withPivot('fecha_inscripcion')
             ->withTimestamps();
+    }
+
+    public function asistencias()
+    {
+        return $this->hasMany(Asistencia::class, 'usuario_id');
+    }
+
+    // % de asistencia del alumno. Si se pasa $materiaId, calcula solo esa
+    // materia; si no, calcula sobre todas las materias con registros
+    // cargados. Null cuando todavía no hay ninguna clase registrada (para
+    // distinguir "sin datos" de "0% de asistencia"). Presente (2) y tardanza
+    // (1) cuentan como asistidas; ausente (0) no. Una ausencia justificada
+    // (ausente con motivo) no entra en el total: ni suma ni resta.
+    public function porcentajeAsistencia(?int $materiaId = null): ?float
+    {
+        $base = fn () => $this->asistencias()
+            ->where(function ($q) {
+                $q->where('estado', '>', Asistencia::AUSENTE)
+                  ->orWhereNull('motivo_justificacion');
+            })
+            ->when($materiaId !== null, fn ($q) => $q->where('materia_id', $materiaId));
+
+        $total = $base()->count();
+
+        if ($total === 0) {
+            return null;
+        }
+
+        $presentes = $base()->where('estado', '>', Asistencia::AUSENTE)->count();
+
+        return round(($presentes / $total) * 100, 2);
     }
 
 

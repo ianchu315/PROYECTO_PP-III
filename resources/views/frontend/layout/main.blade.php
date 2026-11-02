@@ -410,7 +410,7 @@ a:after {
           
 
           <li class="nav-item">
-              <a href="{{ route('bolsadetrabajo.home') }}" class="nav-link border-effect">
+              <a href="{{ auth('usuarios')->check() ? route('bolsadetrabajo.panel') : route('bolsadetrabajo.home') }}" class="nav-link border-effect">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-briefcase-fill" viewBox="0 0 16 16">
                       <path d="M6.5 1A1.5 1.5 0 0 0 5 2.5V3H1.5A1.5 1.5 0 0 0 0 4.5v1.384l7.614 2.03a1.5 1.5 0 0 0 .772 0L16 5.884V4.5A1.5 1.5 0 0 0 14.5 3H11v-.5A1.5 1.5 0 0 0 9.5 1h-3zm0 1h3a.5.5 0 0 1 .5.5V3H6v-.5a.5.5 0 0 1 .5-.5z"/>
                       <path d="M16 6.923V12.5A1.5 1.5 0 0 1 14.5 14H1.5A1.5 1.5 0 0 1 0 12.5V6.923l7.251 1.933a1.5 1.5 0 0 0 1.498 0L16 6.923z"/>
@@ -418,19 +418,6 @@ a:after {
                   Bolsa de Trabajo
               </a>
           </li>
-
-          @auth('usuarios')
-              @if(in_array(auth('usuarios')->user()->rol, ['profesor', 'superadministrador']))
-                  <li class="nav-item">
-                      <a href="{{ route('bolsadetrabajo.profesor.mesas.index') }}" class="nav-link border-effect">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-people-fill" viewBox="0 0 16 16">
-                              <path d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1H7Zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm-9.995 7H5c-.001-.246.154-.986.554-1.767C6.298 11.988 7.671 11 10 11c.348 0 .671.021.986.064.16-.192.242-.42.242-.694 0-.245-.079-.477-.213-.68C10.53 9.222 9.4 9 8 9c-4 0-5 3-5 4s1 1 1 1Z"/>
-                          </svg>
-                          Inscriptos a mesas
-                      </a>
-                  </li>
-              @endif
-          @endauth
 
           <li class="nav-item">
             <a href="http://campus.isft38.edu.ar/" class="nav-link border-effect">

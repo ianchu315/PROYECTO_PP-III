@@ -44,7 +44,7 @@ class CalificacionController extends Controller
             ->orderBy('nombre')
             ->get();
 
-        $materias = Materia::orderBy('materia')->get();
+        $materias = Materia::orderBy('descripcion')->get();
         $mesas = Mesa::with('materia')->orderBy('fecha')->get();
 
         return view('notas.create', compact('alumnos', 'materias', 'mesas'));
@@ -105,7 +105,7 @@ class CalificacionController extends Controller
             ->orderBy('apellido')
             ->orderBy('nombre')
             ->get();
-        $materias = Materia::orderBy('materia')->get();
+        $materias = Materia::orderBy('descripcion')->get();
         $mesas = Mesa::with('materia')->orderBy('fecha')->get();
 
         return view('notas.edit', compact('calificacion', 'alumnos', 'materias', 'mesas'));

@@ -28,21 +28,29 @@
     $esSuperadmin = $rolPanel === 'superadministrador';
 @endphp
 
-<header id="navbar">
+<header id="panel-navbar" class="{{ $esSuperadmin && request()->routeIs('bolsadetrabajo.panel') ? 'panel-navbar-amplio' : '' }}">
     <div class="logo">
-        <a href="{{ route('bolsadetrabajo.panel') }}">
+        <a href="{{ route('novedades') }}" aria-label="Ir a novedades del instituto">
             <img src="/images/logo_isft.png" alt="Logo">
         </a>
     </div>
 
     <nav>
         <ul>
+            <li>
+                <a href="{{ route('bolsadetrabajo.panel') }}">
+                    <i class="ri-dashboard-line{{ request()->routeIs('bolsadetrabajo.panel') ? ' selected' : '' }}"></i>
+                    <span>Panel</span>
+                </a>
+            </li>
+
             {{-- ===== ALUMNO ===== --}}
             @if($esSuperadmin || $rolPanel === 'usuario')
+                @if($rolPanel === 'usuario')
                 <li>
                     <a href="{{ route('bolsadetrabajo.alumno.materias.index') }}">
                         <i class="ri-book-2-line{{ request()->routeIs('bolsadetrabajo.alumno.materias.index') ? ' selected' : '' }}"></i>
-                        <span>Mis materias{{ $esSuperadmin ? ' (alumno)' : '' }}</span>
+                        <span>Mis materias</span>
                     </a>
                 </li>
                 <li>
@@ -51,9 +59,10 @@
                         <span>Mi asistencia</span>
                     </a>
                 </li>
+                @endif
                 <li>
-                    <a href="{{ route('frontend.mesas.index') }}">
-                        <i class="ri-file-list-3-line"></i>
+                    <a href="{{ route('bolsadetrabajo.alumno.mesas.index') }}">
+                        <i class="ri-file-list-3-line{{ request()->routeIs('bolsadetrabajo.alumno.mesas.*') ? ' selected' : '' }}"></i>
                         <span>Mesas</span>
                     </a>
                 </li>
@@ -70,12 +79,13 @@
                 <li>
                     <a href="{{ route('bolsadetrabajo.profesor.materias.index') }}">
                         <i class="ri-book-open-line{{ request()->routeIs('bolsadetrabajo.profesor.materias.*') ? ' selected' : '' }}"></i>
-                        <span>Mis materias{{ $esSuperadmin ? ' (profesor)' : '' }}</span>
+                        <span>{{ $esSuperadmin ? 'Materias' : 'Mis materias' }}</span>
                     </a>
                 </li>
+                @unless($esSuperadmin)
                 <li>
-                    <a href="{{ route('bolsadetrabajo.asistencia.index') }}">
-                        <i class="ri-calendar-check-line"></i>
+                    <a href="{{ route('bolsadetrabajo.profesor.asistencia.index') }}">
+                        <i class="ri-calendar-check-line{{ request()->routeIs('bolsadetrabajo.profesor.asistencia.*') ? ' selected' : '' }}"></i>
                         <span>Asistencia</span>
                     </a>
                 </li>
@@ -85,10 +95,11 @@
                         <span>Notas</span>
                     </a>
                 </li>
+                @endunless
             @endif
 
-            {{-- ===== SUPERADMIN: además, inscriptos a mesas ===== --}}
-            @if($esSuperadmin)
+            {{-- ===== PROFESOR / ADMINISTRADOR / SUPERADMIN: inscriptos a mesas ===== --}}
+            @if($esSuperadmin || $rolPanel === 'administrador' || $rolPanel === 'profesor')
                 <li>
                     <a href="{{ route('bolsadetrabajo.profesor.mesas.index') }}">
                         <i class="ri-file-list-3-line{{ request()->routeIs('bolsadetrabajo.profesor.mesas.*') ? ' selected' : '' }}"></i>
@@ -97,14 +108,21 @@
                 </li>
             @endif
 
-            {{-- ===== PRECEPTOR (rol todavía no implementado) =====
-                 Cuando exista el rol 'preceptor', descomentar y crear las
-                 rutas bolsadetrabajo.preceptor.carreras / .alumnos
+            {{-- ===== PRECEPTOR ===== --}}
             @if($esSuperadmin || $rolPanel === 'preceptor')
-                <li><a href="#"><i class="ri-school-line"></i><span>Carreras</span></a></li>
-                <li><a href="#"><i class="ri-group-line"></i><span>Alumnos</span></a></li>
+                <li>
+                    <a href="{{ route('bolsadetrabajo.preceptor.carreras') }}">
+                        <i class="ri-school-line{{ request()->routeIs('bolsadetrabajo.preceptor.carreras') ? ' selected' : '' }}"></i>
+                        <span>Carreras{{ $esSuperadmin ? ' (preceptor)' : '' }}</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('bolsadetrabajo.preceptor.alumnos.index') }}">
+                        <i class="ri-group-line{{ request()->routeIs('bolsadetrabajo.preceptor.alumnos.*') ? ' selected' : '' }}"></i>
+                        <span>Alumnos</span>
+                    </a>
+                </li>
             @endif
-            --}}
 
             <li>
                 <form id="logout-form-panel" action="{{ route('bolsadetrabajo.logout') }}" method="POST" style="display: none;">
@@ -119,7 +137,7 @@
     </nav>
 </header>
 
-<main class="pf-page">
+<main class="pf-page {{ $esSuperadmin && request()->routeIs('bolsadetrabajo.panel') ? 'pf-page-amplio' : '' }}">
     @yield('content')
 </main>
 

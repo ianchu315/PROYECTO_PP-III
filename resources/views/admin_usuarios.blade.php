@@ -29,6 +29,8 @@
             </div>
             <div class="filtros_buscar_trabajo_busqueda_ordenar_opciones dropdown-menu oculto">
                 <h3 class="dropdown-opcion" data-value="usuario">Usuario</h3>
+                <h3 class="dropdown-opcion" data-value="profesor">Profesor</h3>
+                <h3 class="dropdown-opcion" data-value="preceptor">Preceptor</h3>
                 <h3 class="dropdown-opcion" data-value="administrador">Administrador</h3>
 
             </div>

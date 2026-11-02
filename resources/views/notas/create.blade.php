@@ -19,6 +19,7 @@
 
         <div class="form-group">
             <label for="usuario_id">Alumno</label>
+            @include('partials.filtro_rapido', ['target' => '#usuario_id', 'placeholder' => 'Filtrar alumnos por nombre, apellido o email...'])
             <select name="usuario_id" id="usuario_id" class="form-control" required>
                 <option value="">Seleccione un alumno</option>
                 @foreach($alumnos as $alumno)
@@ -32,7 +33,7 @@
             <select name="materia_id" id="materia_id" class="form-control" required>
                 <option value="">Seleccione una materia</option>
                 @foreach($materias as $materia)
-                    <option value="{{ $materia->id }}" {{ old('materia_id') == $materia->id ? 'selected' : '' }}>{{ $materia->materia }}</option>
+                    <option value="{{ $materia->id }}" {{ old('materia_id') == $materia->id ? 'selected' : '' }}>{{ $materia->descripcion }}</option>
                 @endforeach
             </select>
         </div>
@@ -42,7 +43,7 @@
             <select name="mesa_id" id="mesa_id" class="form-control">
                 <option value="">Sin mesa</option>
                 @foreach($mesas as $mesa)
-                    <option value="{{ $mesa->id }}" {{ old('mesa_id') == $mesa->id ? 'selected' : '' }}>{{ optional($mesa->materia)->materia }} - {{ \Carbon\Carbon::parse($mesa->fecha)->format('d/m/Y') }}</option>
+                    <option value="{{ $mesa->id }}" {{ old('mesa_id') == $mesa->id ? 'selected' : '' }}>{{ optional($mesa->materia)->descripcion }} - {{ \Carbon\Carbon::parse($mesa->fecha)->format('d/m/Y') }}</option>
                 @endforeach
             </select>
         </div>

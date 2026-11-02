@@ -106,6 +106,7 @@ table.pf-table td,
     text-align: left;
     border-bottom: 1px solid #eaeae9;
     font-size: 14px;
+    vertical-align: middle;
 }
 
 table.pf-table thead th,
@@ -113,6 +114,54 @@ table.pf-table thead th,
     color: #700101;
     font-weight: 700;
     background-color: #f9f7f6;
+}
+
+/* Columna de acciones (mesas del alumno, etc.): ancho fijo para que todos
+   los estados (chip verde / botón / texto) arranquen siempre en la misma
+   posición, sin importar el largo del texto. */
+.pf-col-accion {
+    width: 160px;
+    text-align: left !important;
+}
+
+.pf-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 130px;
+    padding: 7px 10px;
+    border-radius: 20px;
+    font-size: 12.5px;
+    font-weight: 700;
+    text-align: center;
+    text-decoration: none;
+    line-height: 1.2;
+    box-sizing: border-box;
+}
+
+.pf-chip-accion {
+    background-color: #700101;
+    color: #fff;
+    border: 2px solid #700101;
+    transition: opacity 0.2s ease;
+}
+
+.pf-chip-accion:hover {
+    opacity: 0.88;
+    color: #fff;
+}
+
+.pf-chip-ok {
+    background-color: #eaf6ec;
+    color: #2e7d32;
+    border: 2px solid #2e7d32;
+}
+
+.pf-chip-muted {
+    background-color: #f5f5f4;
+    color: #8a8a88;
+    border: 2px solid #eaeae9;
+    font-weight: 600;
 }
 
 /* ---- Badges (usados para libre/regular) ---- */
@@ -150,4 +199,134 @@ table.pf-table thead th,
     border: 1px solid #ccc;
     border-radius: 8px;
     font-family: "Overpass", sans-serif;
+}
+
+/* ---- Header / nav compartido por el panel y por bolsa de trabajo
+   (layouts/panel.blade.php y layouts/app2.blade.php usan ambos
+   id="panel-navbar", para que se vean exactamente igual en todos lados) ---- */
+#panel-navbar {
+    position: fixed;
+    top: 20px;
+    left: 0;
+    right: 0;
+    max-width: 1200px;
+    margin: 0 auto;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 8px 18px;
+}
+
+#panel-navbar .logo img {
+    height: 46px;
+    display: block;
+    border-radius: 10px;
+}
+
+#panel-navbar nav {
+    flex: 1;
+    background: #fff;
+    border: 2px solid #eaeae9;
+    border-radius: 15px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    padding: 6px 10px;
+}
+
+#panel-navbar nav ul {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    flex-wrap: wrap;
+}
+
+#panel-navbar nav ul li {
+    position: relative;
+}
+
+#panel-navbar nav ul li a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+}
+
+#panel-navbar nav ul li a:hover {
+    background-color: #f5f5f4;
+}
+
+#panel-navbar nav ul li a i {
+    font-size: 21px;
+    color: #55524f;
+    transition: color 0.2s ease;
+}
+
+#panel-navbar nav ul li a i.selected {
+    color: #700101;
+}
+
+/* Globo/tooltip con el nombre de la sección */
+#panel-navbar nav ul li a span {
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 50%;
+    transform: translate(-50%, 4px);
+    background-color: #212121;
+    color: #fff;
+    font-family: "Overpass", sans-serif;
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    white-space: nowrap;
+    padding: 6px 12px;
+    border-radius: 20px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.18s ease, transform 0.18s ease;
+    z-index: 60;
+}
+
+#panel-navbar nav ul li a span::before {
+    content: "";
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-bottom-color: #212121;
+}
+
+#panel-navbar nav ul li a:hover span {
+    opacity: 1;
+    transform: translate(-50%, 0);
+}
+
+@media (max-width: 620px) {
+    #panel-navbar {
+        top: 10px;
+        gap: 8px;
+        padding: 6px 10px;
+    }
+
+    #panel-navbar .logo img {
+        height: 36px;
+    }
+
+    #panel-navbar nav ul li a {
+        width: 38px;
+        height: 38px;
+    }
+
+    #panel-navbar nav ul li a i {
+        font-size: 18px;
+    }
 }

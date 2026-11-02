@@ -28,7 +28,7 @@
 
 <body>
 
-    <header id="navbar">
+    <header id="panel-navbar">
         <div class="logo">
             <a href="http://www.isft38.edu.ar/novedades">
                 <img src="/images/logo_isft.png" alt="Logo">
@@ -38,75 +38,130 @@
 
         <nav>
             <ul>
-                <li>
-                    <a href="/bolsadetrabajo/home">
-                        <i class="ri-home-2-line{{ request()->is('bolsadetrabajo/home') ? ' selected' : '' }}"></i>
-                        <span>Inicio</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="/bolsadetrabajo/busqueda">
-                        <i class="ri-search-2-line{{ request()->is('bolsadetrabajo/busqueda') ? ' selected' : '' }}"></i>
-                        <span>Búsqueda</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="/bolsadetrabajo/guardar">
-                        <i class="ri-bookmark-line{{ request()->is('bolsadetrabajo/guardar') ? ' selected' : '' }}"></i>
-                        <span>Guardados</span>
-                    </a>
-                </li>
                 @auth('usuarios')
-                    @if(auth('usuarios')->user()->rol === 'administrador')
+                    @php($rolNav = auth('usuarios')->user()->rol)
+                    <li>
+                        <a href="{{ route('bolsadetrabajo.panel') }}">
+                            <i class="ri-dashboard-line{{ request()->routeIs('bolsadetrabajo.panel') ? ' selected' : '' }}"></i>
+                            <span>Panel</span>
+                        </a>
+                    </li>
+
+                    @if($rolNav === 'usuario')
+                        <li>
+                            <a href="{{ route('bolsadetrabajo.alumno.materias.index') }}">
+                                <i class="ri-book-2-line{{ request()->routeIs('bolsadetrabajo.alumno.materias.*') ? ' selected' : '' }}"></i>
+                                <span>Mis materias</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('bolsadetrabajo.asistencia.index') }}">
+                                <i class="ri-calendar-check-line{{ request()->routeIs('bolsadetrabajo.asistencia.index') ? ' selected' : '' }}"></i>
+                                <span>Mi asistencia</span>
+                            </a>
+                        </li>
+                    @endif
+
+                    @if(in_array($rolNav, ['profesor', 'administrador', 'superadministrador'], true))
+                        <li>
+                            <a href="{{ route('bolsadetrabajo.profesor.materias.index') }}">
+                                <i class="ri-book-open-line{{ request()->routeIs('bolsadetrabajo.profesor.materias.*') ? ' selected' : '' }}"></i>
+                                <span>{{ $rolNav === 'superadministrador' ? 'Materias' : 'Mis materias' }}</span>
+                            </a>
+                        </li>
+                        @if($rolNav !== 'superadministrador')
+                            <li>
+                                <a href="{{ route('bolsadetrabajo.profesor.asistencia.index') }}">
+                                    <i class="ri-calendar-check-line{{ request()->routeIs('bolsadetrabajo.profesor.asistencia.*') ? ' selected' : '' }}"></i>
+                                    <span>Asistencia</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('bolsadetrabajo.profesor.materias.index') }}">
+                                    <i class="ri-edit-2-line"></i>
+                                    <span>Notas</span>
+                                </a>
+                            </li>
+                        @endif
+                    @endif
+
+                    @if($rolNav === 'administrador')
                         <li>
                             <a href="/bolsadetrabajo/dashboard">
                                 <i class="ri-settings-2-line{{ request()->is('bolsadetrabajo/dashboard') ? ' selected' : '' }}"></i>
                                 <span>Dashboard</span>
                             </a>
                         </li>
+                    @endif
+
+                    @if(in_array($rolNav, ['profesor', 'administrador', 'superadministrador'], true))
                         <li>
                             <a href="{{ route('bolsadetrabajo.profesor.mesas.index') }}">
-                                <i class="ri-file-list-3-line{{ request()->is('bolsadetrabajo/profesor/mesas*') ? ' selected' : '' }}"></i>
-                                <span>Alumnos inscriptos a mesas</span>
-                            </a>
-                        </li>
-                    @else
-                        @if(auth('usuarios')->user()->rol === 'profesor')
-                            <li>
-                                <a href="{{ route('bolsadetrabajo.profesor.materias.index') }}">
-                                    <i class="ri-book-2-line{{ request()->is('bolsadetrabajo/profesor/materias*') ? ' selected' : '' }}"></i>
-                                    <span>Mis materias</span>
-                                </a>
-                            </li>
-                        @endif
-                        @if(in_array(auth('usuarios')->user()->rol, ['profesor', 'superadministrador']))
-                            <li>
-                                <a href="{{ route('bolsadetrabajo.profesor.mesas.index') }}">
-                                    <i class="ri-file-list-3-line{{ request()->is('bolsadetrabajo/profesor/mesas*') ? ' selected' : '' }}"></i>
-                                    <span>Alumnos inscriptos a mesas</span>
-                                </a>
-                            </li>
-                        @endif
-                        <li>
-                            <a href="/bolsadetrabajo/perfil">
-                                <i class="ri-user-line{{ request()->is('bolsadetrabajo/perfil') ? ' selected' : '' }}"></i>
-                                <span>Perfil</span>
+                                <i class="ri-file-list-3-line{{ request()->routeIs('bolsadetrabajo.profesor.mesas.*') ? ' selected' : '' }}"></i>
+                                <span>Inscriptos a mesas</span>
                             </a>
                         </li>
                     @endif
+
+                    @if(in_array($rolNav, ['preceptor', 'superadministrador'], true))
+                        <li>
+                            <a href="{{ route('bolsadetrabajo.preceptor.carreras') }}">
+                                <i class="ri-school-line{{ request()->routeIs('bolsadetrabajo.preceptor.carreras') ? ' selected' : '' }}"></i>
+                                <span>Carreras{{ $rolNav === 'superadministrador' ? ' (preceptor)' : '' }}</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('bolsadetrabajo.preceptor.alumnos.index') }}">
+                                <i class="ri-group-line{{ request()->routeIs('bolsadetrabajo.preceptor.alumnos.*') ? ' selected' : '' }}"></i>
+                                <span>Alumnos</span>
+                            </a>
+                        </li>
+                    @endif
+
+                    @if(in_array($rolNav, ['usuario', 'superadministrador'], true))
+                        <li>
+                            <a href="{{ route('bolsadetrabajo.alumno.mesas.index') }}">
+                                <i class="ri-file-list-3-line{{ request()->routeIs('bolsadetrabajo.alumno.mesas.*') ? ' selected' : '' }}"></i>
+                                <span>Mesas</span>
+                            </a>
+                        </li>
+                    @endif
+
+                    <li>
+                        <a href="{{ route('bolsadetrabajo.home') }}">
+                            <i class="ri-briefcase-line{{ request()->routeIs('bolsadetrabajo.home') ? ' selected' : '' }}"></i>
+                            <span>Bolsa de trabajo</span>
+                        </a>
+                    </li>
+                    <li>
+                        <form id="logout-form-app2" action="{{ route('bolsadetrabajo.logout') }}" method="POST" style="display:none;">
+                            @csrf
+                        </form>
+                        <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form-app2').submit();">
+                            <i class="ri-logout-box-r-line"></i>
+                            <span>Salir</span>
+                        </a>
+                    </li>
+                @else
+                    <li>
+                        <a href="/bolsadetrabajo/home">
+                            <i class="ri-home-2-line{{ request()->is('bolsadetrabajo/home') ? ' selected' : '' }}"></i>
+                            <span>Inicio</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/bolsadetrabajo/busqueda">
+                            <i class="ri-search-2-line{{ request()->is('bolsadetrabajo/busqueda') ? ' selected' : '' }}"></i>
+                            <span>Búsqueda</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/bolsadetrabajo/guardar">
+                            <i class="ri-bookmark-line{{ request()->is('bolsadetrabajo/guardar') ? ' selected' : '' }}"></i>
+                            <span>Guardados</span>
+                        </a>
+                    </li>
                 @endauth
-                <li>
-                    <form id="logout-form" action="{{ route('bolsadetrabajo.logout') }}" method="POST"
-                        style="display: none;">
-                        @csrf
-                    </form>
-
-                    <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                        <i class="ri-logout-box-r-line"></i>
-                        <span>Salir</span>
-                    </a>
-                </li>
-
             </ul>
         </nav>
 

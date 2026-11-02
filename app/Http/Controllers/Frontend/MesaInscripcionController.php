@@ -27,7 +27,7 @@ class MesaInscripcionController extends Controller
 
         $service = new MesaInscripcionService();
         if (!$service->canRegister($usuario, $mesa, $inscripciones)) {
-            return redirect()->route('frontend.mesas.index')
+            return redirect()->route('bolsadetrabajo.alumno.mesas.index')
                 ->with('error', 'No puedes inscribirte a esta mesa: no pertenece a tu carrera o ya tienes una inscripción para esa fecha.');
         }
 
@@ -53,7 +53,7 @@ class MesaInscripcionController extends Controller
 
         $service = new MesaInscripcionService();
         if (!$service->canRegister($usuario, $mesa, $inscripciones)) {
-            return redirect()->route('frontend.mesas.index')
+            return redirect()->route('bolsadetrabajo.alumno.mesas.index')
                 ->with('error', 'No puedes inscribirte a esta mesa: no pertenece a tu carrera o ya tienes una inscripción para esa fecha.');
         }
 
@@ -72,7 +72,7 @@ class MesaInscripcionController extends Controller
             'condicion'         => $condicion,
         ]);
 
-        return redirect()->route('frontend.mesas.index')
+        return redirect()->route('bolsadetrabajo.alumno.mesas.index')
             ->with('success', "Inscripción confirmada correctamente (condición: {$condicion}).");
     }
 }

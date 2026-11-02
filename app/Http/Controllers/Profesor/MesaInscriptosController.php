@@ -30,6 +30,8 @@ class MesaInscriptosController extends Controller
 
         $mesasQuery = Mesa::with(['materia', 'carrera'])
             ->withCount('inscripciones')
+            ->orderBy('carrera_id')
+            ->orderBy('materia_id')
             ->orderBy('fecha');
 
         // El superadministrador ve todas las mesas. Profesor y administrador

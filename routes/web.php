@@ -105,10 +105,15 @@ Route::middleware('auth') // guard por defecto: web
     Route::group([], __DIR__ . '/bolsa_trabajo.php');
 
     Route::group([], __DIR__ . '/profesor_notas.php');
+    Route::group([], __DIR__ . '/profesor_asistencia.php');
 
     Route::group([], __DIR__ . '/profesor_mesas.php');
 
     Route::group([], __DIR__ . '/panel_usuario.php');
+
+    Route::group([], __DIR__ . '/preceptor.php');
+
+    Route::group([], __DIR__ . '/admin_asignaciones.php');
 // });
 
 

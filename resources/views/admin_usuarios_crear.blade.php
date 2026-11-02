@@ -149,6 +149,8 @@
                 <label for="rol">Rol</label>
                 <select id="rol" name="rol"  class="@error('rol') input-error @enderror">
                     <option value="usuario">Usuario</option>
+                    <option value="profesor">Profesor</option>
+                    <option value="preceptor">Preceptor</option>
                     <option value="administrador">Administrador</option>
                 </select>
                 @error('rol')
