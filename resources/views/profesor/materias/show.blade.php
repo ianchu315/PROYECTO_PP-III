@@ -124,6 +124,11 @@
         @if($alumnosData->isEmpty())
             <p class="pf-muted mb-0">Todavía no agregaste alumnos a esta materia.</p>
         @else
+            @php
+                // Solo el profesor a cargo carga notas; admin/superadmin las ven en modo lectura.
+                $puedeCargarNotas = Auth::guard('usuarios')->user()->rol === 'profesor';
+                $soloLectura = $puedeCargarNotas ? '' : 'readonly';
+            @endphp
             <div class="pf-table-wrap">
                 @include('partials.filtro_rapido', ['target' => '#tabla-notas', 'celdas' => 1, 'placeholder' => 'Buscar alumno en esta materia...'])
                 <table class="pf-table np-tabla-notas" id="tabla-notas">
@@ -157,21 +162,21 @@
                                 </td>
 
                                 <td>
-                                    <input type="number" class="np-input-nota" min="0" max="10" step="0.5"
+                                    <input type="number" class="np-input-nota" min="0" max="10" step="0.5" {{ $soloLectura }}
                                            data-usuario-id="{{ $alumno->id }}"
                                            data-cuatrimestre="1"
                                            data-numero-nota="1"
                                            value="{{ $notaPrimerCuatrimestre?->nota }}">
                                 </td>
                                 <td>
-                                    <input type="number" class="np-input-nota" min="0" max="10" step="0.5"
+                                    <input type="number" class="np-input-nota" min="0" max="10" step="0.5" {{ $soloLectura }}
                                            data-usuario-id="{{ $alumno->id }}"
                                            data-cuatrimestre="2"
                                            data-numero-nota="1"
                                            value="{{ $notaSegundoCuatrimestre?->nota }}">
                                 </td>
                                 <td>
-                                    <input type="number" class="np-input-promediada" min="0" max="10" step="0.5"
+                                    <input type="number" class="np-input-promediada" min="0" max="10" step="0.5" {{ $soloLectura }}
                                            data-usuario-id="{{ $alumno->id }}"
                                            value="{{ $notaPromediada?->nota ?? $promediadaCalculada }}">
                                 </td>
@@ -180,10 +185,14 @@
                     </tbody>
                 </table>
             </div>
-            <div class="np-guardar-notas">
-                <button type="button" class="btn btn-primary" id="np-guardar-notas">Guardar notas</button>
-                <span class="pf-muted" id="np-guardar-estado" role="status"></span>
-            </div>
+            @if($puedeCargarNotas)
+                <div class="np-guardar-notas">
+                    <button type="button" class="btn btn-primary" id="np-guardar-notas">Guardar notas</button>
+                    <span class="pf-muted" id="np-guardar-estado" role="status"></span>
+                </div>
+            @else
+                <p class="pf-muted" style="margin-top:12px;">Las notas las carga únicamente el profesor a cargo de la materia.</p>
+            @endif
         @endif
     </div>
 </div>
@@ -195,6 +204,16 @@
         <h3 id="np-modal-nombre"></h3>
         <p><strong>Materia:</strong> {{ $materia->descripcion }}</p>
         <div id="np-modal-notas"></div>
+    </div>
+</div>
+
+{{-- 4. Pop up amistoso al guardar las notas --}}
+<div id="np-popup-overlay" class="np-popup-overlay" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="np-popup-titulo">
+    <div class="np-popup">
+        <div class="np-popup-icono" id="np-popup-icono">🎉</div>
+        <h3 id="np-popup-titulo"></h3>
+        <p id="np-popup-mensaje"></p>
+        <button type="button" class="btn btn-primary" id="np-popup-aceptar">¡Genial!</button>
     </div>
 </div>
 
@@ -401,6 +420,21 @@
     }
     .np-modal-notas-lista { list-style:none; padding:0; margin:10px 0 0; }
     .np-modal-notas-lista li { padding:4px 0; border-bottom:1px solid #f0f0f0; }
+
+    /* Pop up amistoso de "notas cargadas" */
+    .np-popup-overlay {
+        position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:1100;
+        align-items:center; justify-content:center;
+    }
+    .np-popup {
+        background:#fff; border-radius:16px; padding:28px 30px; width:92%; max-width:380px;
+        text-align:center; box-shadow:0 10px 30px rgba(0,0,0,.25);
+        animation:np-popup-in .22s ease-out;
+    }
+    .np-popup-icono { font-size:46px; line-height:1; margin-bottom:8px; }
+    .np-popup h3 { margin:0 0 8px; }
+    .np-popup p { margin:0 0 18px; color:#555; }
+    @keyframes np-popup-in { from { transform:scale(.9); opacity:0; } to { transform:scale(1); opacity:1; } }
 </style>
 
 <script>
@@ -417,11 +451,25 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // --- Pop up amistoso (éxito / error al guardar) ---
+    const popupOverlay = document.getElementById('np-popup-overlay');
+    function mostrarPopup(icono, titulo, mensaje) {
+        document.getElementById('np-popup-icono').textContent = icono;
+        document.getElementById('np-popup-titulo').textContent = titulo;
+        document.getElementById('np-popup-mensaje').textContent = mensaje;
+        popupOverlay.style.display = 'flex';
+        document.getElementById('np-popup-aceptar').focus();
+    }
+    function cerrarPopup() { popupOverlay.style.display = 'none'; }
+    document.getElementById('np-popup-aceptar').addEventListener('click', cerrarPopup);
+    popupOverlay.addEventListener('click', function (e) { if (e.target === popupOverlay) cerrarPopup(); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') cerrarPopup(); });
+
     const guardarNotasButton = document.getElementById('np-guardar-notas');
     const guardarEstado = document.getElementById('np-guardar-estado');
 
     guardarNotasButton?.addEventListener('click', function () {
-        const notas = Array.from(document.querySelectorAll('.np-tabla-notas tbody tr')).map(function (fila) {
+        const notas = Array.from(document.querySelectorAll('.np-tabla-notas tbody tr[data-usuario-id]')).map(function (fila) {
             const inputsCuatrimestre = fila.querySelectorAll('.np-input-nota');
             const inputPromediada = fila.querySelector('.np-input-promediada');
 
@@ -450,10 +498,12 @@ document.addEventListener('DOMContentLoaded', function () {
             return response.json();
         })
         .then(() => {
-            guardarEstado.textContent = 'Notas guardadas correctamente.';
+            guardarEstado.textContent = '';
+            mostrarPopup('🎉', '¡Listo!', 'Las notas fueron cargadas correctamente. ¡Gracias por tu trabajo! 😊');
         })
         .catch(() => {
-            guardarEstado.textContent = 'No se pudieron guardar las notas.';
+            guardarEstado.textContent = '';
+            mostrarPopup('😕', 'Ups, algo salió mal', 'No pudimos guardar las notas. Revisá que los valores estén entre 0 y 10 e intentá de nuevo.');
         })
         .finally(() => {
             this.disabled = false;

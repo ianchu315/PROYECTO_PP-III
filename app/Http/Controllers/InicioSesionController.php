@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Flasher\Laravel\Facade\Flasher;
 
@@ -61,6 +62,12 @@ class InicioSesionController extends Controller
                 Flasher::addError('Tu cuenta fue dada de baja. Contactate con el administrador si creés que es un error.');
                 return back()->withInput();
             }
+
+            // Última conexión: se guarda la ANTERIOR en la sesión (es la que se
+            // muestra en el panel) y se registra la de ahora. Se usa DB::table
+            // para no tocar updated_at del usuario.
+            $request->session()->put('ultima_conexion_previa', $usuario->getRawOriginal('ultima_conexion'));
+            DB::table('usuarios')->where('id', $usuario->id)->update(['ultima_conexion' => now()]);
 
             if (!$usuario->perfil_completado) {
                 Flasher::addSuccess('Completa tu perfil');

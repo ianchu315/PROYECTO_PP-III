@@ -245,6 +245,9 @@ class PreceptorController extends Controller
         return back();
     }
 
+    // Las notas ya no las carga el preceptor, solo el profesor a cargo de la
+    // materia (ver Profesor\NotasProfesorController). Acá solo se consultan.
+
     // La asistencia ya no la carga el preceptor, solo el profesor a cargo
     // de la materia (ver App\Http\Controllers\Profesor\
     // AsistenciaProfesorController). Acá el preceptor solo la consulta: el

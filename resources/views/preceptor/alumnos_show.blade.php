@@ -109,7 +109,7 @@
                 </div>
             </div>
 
-            {{-- Notas: pasar en limpio cuatrimestre 1, 2, promediada y extra --}}
+            {{-- Notas: de solo lectura. Las carga el profesor a cargo de la materia. --}}
             <div style="margin-top:16px;">
                 <h4 style="font-size:14px; margin-bottom:8px;">Notas</h4>
                 <div class="pf-table-wrap">
@@ -125,38 +125,10 @@
                         <tbody>
                             <tr>
                                 @foreach([1, 2] as $cuatrimestre)
-                                    <td>
-                                        <form method="POST" action="{{ route('bolsadetrabajo.preceptor.alumnos.guardarNota', [$alumno, $materia]) }}" class="pf-form-inline">
-                                            @csrf
-                                            <input type="hidden" name="tipo" value="cuatrimestre">
-                                            <input type="hidden" name="cuatrimestre" value="{{ $cuatrimestre }}">
-                                            <input type="number" name="nota" step="0.01" min="0" max="10"
-                                                   value="{{ optional($item['notas']->firstWhere('cuatrimestre', $cuatrimestre))->nota }}"
-                                                   style="width:70px;">
-                                            <button type="submit" class="btn btn-secondary btn-sm">Guardar</button>
-                                        </form>
-                                    </td>
+                                    <td>{{ optional($item['notas']->firstWhere('cuatrimestre', $cuatrimestre))->nota ?? '-' }}</td>
                                 @endforeach
-                                <td>
-                                    <form method="POST" action="{{ route('bolsadetrabajo.preceptor.alumnos.guardarNota', [$alumno, $materia]) }}" class="pf-form-inline">
-                                        @csrf
-                                        <input type="hidden" name="tipo" value="promediada">
-                                        <input type="number" name="nota" step="0.01" min="0" max="10"
-                                               value="{{ optional($item['notaPromediada'])->nota }}"
-                                               style="width:70px;">
-                                        <button type="submit" class="btn btn-secondary btn-sm">Guardar</button>
-                                    </form>
-                                </td>
-                                <td>
-                                    <form method="POST" action="{{ route('bolsadetrabajo.preceptor.alumnos.guardarNota', [$alumno, $materia]) }}" class="pf-form-inline">
-                                        @csrf
-                                        <input type="hidden" name="tipo" value="extra">
-                                        <input type="number" name="nota" step="0.01" min="0" max="10"
-                                               value="{{ optional($item['notaExtra'])->nota }}"
-                                               style="width:70px;">
-                                        <button type="submit" class="btn btn-secondary btn-sm">Guardar</button>
-                                    </form>
-                                </td>
+                                <td>{{ optional($item['notaPromediada'])->nota ?? '-' }}</td>
+                                <td>{{ optional($item['notaExtra'])->nota ?? '-' }}</td>
                             </tr>
                         </tbody>
                     </table>

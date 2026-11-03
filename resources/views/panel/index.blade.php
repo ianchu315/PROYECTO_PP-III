@@ -11,6 +11,8 @@
 @endif
 
 @if($esSuperadmin)
+    @include('partials.panel_info_usuario')
+
     {{-- Para el superadmin, la caja de "Bienvenido" pasa a ser este panel de
          2 secciones (profesores + usuarios) en vez del saludo genérico. --}}
     @include('partials.panel_admin_asignaciones')
@@ -21,6 +23,8 @@
             Usá el menú de arriba para moverte por las secciones disponibles para tu usuario.
         </p>
     </div>
+
+    @include('partials.panel_info_usuario')
 @endif
 
 @endsection

@@ -37,6 +37,10 @@ class Usuario extends Authenticatable implements CanResetPassword
         'telefono'
     ];
 
+    protected $casts = [
+        'ultima_conexion' => 'datetime',
+    ];
+
     protected $hidden = [
         'password',
         'remember_token',

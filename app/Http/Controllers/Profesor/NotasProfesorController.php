@@ -45,6 +45,24 @@ class NotasProfesorController extends Controller
         return $query->firstOrFail();
     }
 
+    // Cargar o modificar notas es EXCLUSIVO del profesor a cargo de la materia
+    // (el que el superadmin dejó asignado en profesor_usuario_id). Administrador
+    // y superadministrador pueden ver el panel, pero no cargan notas.
+    private function materiaParaCargarNotas(int $materiaId): Materia
+    {
+        $usuario = Auth::guard('usuarios')->user();
+
+        abort_if(
+            !$usuario || $usuario->rol !== 'profesor',
+            403,
+            'Solo el profesor a cargo de la materia puede cargar notas.'
+        );
+
+        return Materia::where('id', $materiaId)
+            ->where('profesor_usuario_id', $usuario->id)
+            ->firstOrFail();
+    }
+
     public function index()
     {
         $profesor = $this->profesorActual();
@@ -166,7 +184,7 @@ class NotasProfesorController extends Controller
     // condición recalculada para refrescar la fila sin recargar la página.
     public function guardarNota(Request $request, int $materiaId)
     {
-        $materia = $this->materiaDelProfesor($materiaId);
+        $materia = $this->materiaParaCargarNotas($materiaId);
 
         $validator = Validator::make($request->all(), [
             'usuario_id'   => ['required', 'exists:usuarios,id'],
@@ -205,7 +223,7 @@ class NotasProfesorController extends Controller
 
     public function guardarNotaPromediada(Request $request, int $materiaId)
     {
-        $materia = $this->materiaDelProfesor($materiaId);
+        $materia = $this->materiaParaCargarNotas($materiaId);
 
         $validator = Validator::make($request->all(), [
             'usuario_id' => ['required', 'exists:usuarios,id'],
@@ -239,7 +257,7 @@ class NotasProfesorController extends Controller
 
     public function guardarNotas(Request $request, int $materiaId)
     {
-        $materia = $this->materiaDelProfesor($materiaId);
+        $materia = $this->materiaParaCargarNotas($materiaId);
 
         $validator = Validator::make($request->all(), [
             'notas'                              => ['required', 'array'],
@@ -299,13 +317,16 @@ class NotasProfesorController extends Controller
             }
         });
 
-        return response()->json(['ok' => true]);
+        return response()->json([
+            'ok'      => true,
+            'mensaje' => '¡Listo! Las notas fueron cargadas correctamente.',
+        ]);
     }
 
     // Guarda/actualiza la nota extra (recuperatorio) de un alumno en la materia.
     public function guardarNotaExtra(Request $request, int $materiaId)
     {
-        $materia = $this->materiaDelProfesor($materiaId);
+        $materia = $this->materiaParaCargarNotas($materiaId);
 
         $validator = Validator::make($request->all(), [
             'usuario_id' => ['required', 'exists:usuarios,id'],

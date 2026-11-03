@@ -28,6 +28,6 @@ Route::middleware(['auth:usuarios'])
         Route::delete('alumnos/{usuario}/materias/{materia}', [PreceptorController::class, 'quitarMateria'])
             ->name('alumnos.quitarMateria');
 
-        Route::post('alumnos/{usuario}/materias/{materia}/notas', [PreceptorController::class, 'guardarNota'])
-            ->name('alumnos.guardarNota');
+        // Las notas las carga solo el profesor a cargo de la materia
+        // (ver routes/profesor_notas.php). El preceptor solo las consulta.
     });

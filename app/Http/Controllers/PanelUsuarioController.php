@@ -2,9 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Calificacion;
 use App\Models\Carrera;
+use App\Models\Etiqueta;
 use App\Models\Materia;
+use App\Models\Mesa;
+use App\Models\MesaInscripcion;
 use App\Models\Usuario;
+use Carbon\Carbon;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -107,8 +113,11 @@ class PanelUsuarioController extends Controller
                 ->groupBy('carrera_id');
         }
 
+        $infoUsuario = $usuario ? $this->armarInfoUsuario($usuario) : [];
+
         return view('panel.index', compact(
             'usuario',
+            'infoUsuario',
             'esSuperadmin',
             'usuariosPendientes',
             'usuariosActivos',
@@ -121,5 +130,153 @@ class PanelUsuarioController extends Controller
             'buscarPreceptor',
             'buscarAlumno'
         ));
+    }
+
+    // Información que se muestra en el panel de cada usuario: última
+    // conexión, avisos según su rol y novedades del instituto.
+    private function armarInfoUsuario(Usuario $usuario): array
+    {
+        $zona = 'America/Argentina/Buenos_Aires';
+
+        // La conexión "anterior" se guarda en sesión al loguearse (ver
+        // InicioSesionController). Si la sesión es anterior a este cambio,
+        // se usa la última registrada en la base.
+        $previaRaw = session()->has('ultima_conexion_previa')
+            ? session('ultima_conexion_previa')
+            : $usuario->getRawOriginal('ultima_conexion');
+
+        $ultimaConexion = $previaRaw ? Carbon::parse($previaRaw)->timezone($zona) : null;
+
+        return [
+            'ultimaConexion' => $ultimaConexion,
+            'avisos'         => $this->avisosDelUsuario($usuario, $ultimaConexion),
+            'novedades'      => $this->novedadesRecientes(),
+        ];
+    }
+
+    private function avisosDelUsuario(Usuario $usuario, ?Carbon $desde): array
+    {
+        $avisos = [];
+
+        switch ($usuario->rol) {
+            case 'usuario': // alumno
+                $limite = $desde ? $desde->copy()->timezone('UTC') : now()->subDays(30);
+
+                $notasNuevas = Calificacion::where('usuario_id', $usuario->id)
+                    ->whereNotNull('nota')
+                    ->where('updated_at', '>', $limite)
+                    ->count();
+
+                if ($notasNuevas > 0) {
+                    $avisos[] = [
+                        'icono' => '📝',
+                        'texto' => $notasNuevas === 1
+                            ? 'Tenés 1 nota nueva cargada.'
+                            : "Tenés {$notasNuevas} notas nuevas cargadas.",
+                        'url'   => route('bolsadetrabajo.alumno.materias.index'),
+                    ];
+                }
+
+                $mesas = MesaInscripcion::where('usuario_id', $usuario->id)
+                    ->whereHas('mesa', fn ($q) => $q->whereDate('fecha', '>=', today()))
+                    ->with('mesa.materia')
+                    ->get()
+                    ->sortBy(fn ($i) => $i->mesa->fecha)
+                    ->take(3);
+
+                foreach ($mesas as $inscripcion) {
+                    $avisos[] = [
+                        'icono' => '📅',
+                        'texto' => 'Estás inscripto a la mesa de ' . ($inscripcion->mesa->materia->descripcion ?? 'una materia')
+                                   . ' el ' . Carbon::parse($inscripcion->mesa->fecha)->format('d/m/Y') . '.',
+                        'url'   => route('bolsadetrabajo.alumno.mesas.index'),
+                    ];
+                }
+
+                if (!$usuario->perfil_completado) {
+                    $avisos[] = [
+                        'icono' => '👤',
+                        'texto' => 'Todavía no completaste tu perfil.',
+                        'url'   => route('bolsadetrabajo.perfil.editar'),
+                    ];
+                }
+                break;
+
+            case 'profesor':
+                $materias = Materia::where('profesor_usuario_id', $usuario->id)->count();
+                $avisos[] = [
+                    'icono' => '📚',
+                    'texto' => $materias === 0
+                        ? 'Todavía no tenés materias asignadas.'
+                        : ($materias === 1 ? 'Tenés 1 materia a cargo.' : "Tenés {$materias} materias a cargo."),
+                    'url'   => $materias > 0 ? route('bolsadetrabajo.profesor.materias.index') : null,
+                ];
+
+                $profesorMesas = $usuario->profesorMesas;
+                if ($profesorMesas) {
+                    $proximasMesas = Mesa::where(function ($q) use ($profesorMesas) {
+                            $q->where('profesor_id', $profesorMesas->id)
+                              ->orWhere('vocal_id', $profesorMesas->id);
+                        })
+                        ->whereDate('fecha', '>=', today())
+                        ->count();
+
+                    if ($proximasMesas > 0) {
+                        $avisos[] = [
+                            'icono' => '📅',
+                            'texto' => $proximasMesas === 1
+                                ? 'Tenés 1 mesa de examen próxima.'
+                                : "Tenés {$proximasMesas} mesas de examen próximas.",
+                            'url'   => route('bolsadetrabajo.profesor.mesas.index'),
+                        ];
+                    }
+                }
+                break;
+
+            case 'preceptor':
+                $carreras = $usuario->carrerasAsignadas()->count();
+                $avisos[] = [
+                    'icono' => '🎓',
+                    'texto' => $carreras === 0
+                        ? 'Todavía no tenés carreras asignadas.'
+                        : ($carreras === 1 ? 'Tenés 1 carrera asignada.' : "Tenés {$carreras} carreras asignadas."),
+                    'url'   => $carreras > 0 ? route('bolsadetrabajo.preceptor.carreras') : null,
+                ];
+                break;
+
+            case 'superadministrador':
+                $pendientes = Usuario::where('estado', 'pendiente')->count();
+                if ($pendientes > 0) {
+                    $avisos[] = [
+                        'icono' => '⏳',
+                        'texto' => $pendientes === 1
+                            ? 'Hay 1 usuario pendiente de aprobación.'
+                            : "Hay {$pendientes} usuarios pendientes de aprobación.",
+                        'url'   => null,
+                    ];
+                }
+                break;
+        }
+
+        return $avisos;
+    }
+
+    // Últimas novedades del instituto (mismas que muestra /novedades).
+    private function novedadesRecientes()
+    {
+        $etiqueta = Etiqueta::where('nombre', 'novedades')->first();
+
+        if (!$etiqueta) {
+            return collect();
+        }
+
+        return $etiqueta->novedades()
+            ->take(4)
+            ->get()
+            ->map(fn ($n) => [
+                'titulo' => $n->titulo,
+                'resumen' => Str::limit(trim(strip_tags($n->cuerpo)), 110),
+                'fecha'  => optional($n->created_at)->timezone('America/Argentina/Buenos_Aires')->format('d/m/Y'),
+            ]);
     }
 }
